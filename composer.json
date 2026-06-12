@@ -1,0 +1,62 @@
+{
+    "name": "juliofarra/yii2-logevent",
+    "description": "Yii2 behavior that automatically audits ActiveRecord changes (INSERT, UPDATE, DELETE) into a log table, storing JSON snapshots and diffs, with support for excluded and masked attributes.",
+    "type": "yii2-extension",
+    "keywords": [
+        "yii2",
+        "behavior",
+        "audit",
+        "audit-trail",
+        "log",
+        "activerecord",
+        "extension"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Julio Farra",
+            "email": "juliofarra@gmail.com",
+            "homepage": "https://github.com/juliofarra"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/juliofarra/yii2-logevent/issues",
+        "source": "https://github.com/juliofarra/yii2-logevent"
+    },
+    "require": {
+        "php": ">=8.0",
+        "yiisoft/yii2": "~2.0.45"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "lab37\\logevent\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "lab37\\logevent\\tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        }
+    }
+}
