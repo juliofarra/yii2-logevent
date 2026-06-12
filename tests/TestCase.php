@@ -60,14 +60,14 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     protected function createLogTable(string $name): void
     {
         Yii::$app->db->createCommand()->createTable($name, [
-            'id'        => 'pk',
-            'objeto'    => 'text NOT NULL',
-            'objeto_id' => 'integer NOT NULL',
-            'evento'    => 'text NOT NULL',
-            'log_info'  => 'text NOT NULL',
-            'id_user'   => 'integer',
-            'ts'        => 'timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP',
-            'ip'        => 'text',
+            'id'         => 'pk',
+            'entity'     => 'text NOT NULL',
+            'entity_id'  => 'integer NOT NULL',
+            'event'      => 'text NOT NULL',
+            'data'       => 'text NOT NULL',
+            'user_id'    => 'integer',
+            'created_at' => 'timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            'ip'         => 'text',
         ])->execute();
     }
 }

@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `exclude` option: attributes invisible to the log.
 - `mask` option: attributes logged with their value replaced by `*****` (configurable via `maskValue`).
 - Configurable log table per model through `logEventClass`.
-- `LogEvent` ActiveRecord model and `LogEventQuery` with `forObject()`, `ofEvent()` and `ordered()` scopes.
+- `LogEvent` ActiveRecord model and `LogEventQuery` with `forEntity()`, `ofEvent()` and `ordered()` scopes. The `entity` + `entity_id` columns form a polymorphic reference to the audited record.
 - `logEvents` relation on audited models.
 - Namespaced Yii2 migration creating the `log_event` table (PostgreSQL, MySQL/MariaDB, SQLite).
 - PHPUnit test suite (SQLite in-memory).

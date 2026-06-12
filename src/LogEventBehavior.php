@@ -94,8 +94,8 @@ class LogEventBehavior extends Behavior
      */
     public function getLogEvents(): ActiveQuery
     {
-        return $this->owner->hasMany($this->logEventClass, ['objeto_id' => $this->idAttribute])
-            ->andWhere(['objeto' => $this->owner->tableName()])
+        return $this->owner->hasMany($this->logEventClass, ['entity_id' => $this->idAttribute])
+            ->andWhere(['entity' => $this->owner->tableName()])
             ->ordered();
     }
 
@@ -190,19 +190,19 @@ class LogEventBehavior extends Behavior
      * A failure to save the log never interrupts the operation being logged:
      * errors are reported through [[handleErrors()]].
      *
-     * @param string $evento One of the LogEvent::EVENT_* constants.
-     * @param array $info Data to store in the `log_info` JSON field.
+     * @param string $event One of the LogEvent::EVENT_* constants.
+     * @param array $info Data to store in the `data` JSON field.
      */
-    protected function saveLog(string $evento, array $info): void
+    protected function saveLog(string $event, array $info): void
     {
         /** @var LogEvent $log */
         $log = new $this->logEventClass();
 
-        $log->evento    = $evento;
-        $log->objeto    = $this->owner->tableName();
-        $log->objeto_id = $this->owner->getAttribute($this->idAttribute);
-        $log->log_info  = $info;
-        $log->id_user   = $this->resolveUserId();
+        $log->event     = $event;
+        $log->entity    = $this->owner->tableName();
+        $log->entity_id = $this->owner->getAttribute($this->idAttribute);
+        $log->data      = $info;
+        $log->user_id   = $this->resolveUserId();
         $log->ip        = $this->resolveIp();
 
         if (!$log->save()) {

@@ -17,16 +17,19 @@ use yii\db\ActiveRecord;
  * that overrides `tableName()` and configure it in the behavior's
  * `logEventClass` property.
  *
+ * The `entity` + `entity_id` pair is a polymorphic reference to the audited
+ * record: `entity` holds its table name and `entity_id` its primary key.
+ *
  * @property int $id
- * @property string $objeto Table name of the audited record
- * @property int $objeto_id ID of the audited record
- * @property string $evento Logged SQL event: INSERT, UPDATE or DELETE
- * @property array|string $log_info Logged data, in JSON format
- * @property int|null $id_user ID of the user who performed the action
- * @property string $ts Timestamp of the event
+ * @property string $entity Table name of the audited record
+ * @property int $entity_id ID of the audited record
+ * @property string $event Logged SQL event: INSERT, UPDATE or DELETE
+ * @property array|string $data Logged data, in JSON format
+ * @property int|null $user_id ID of the user who performed the action
+ * @property string $created_at Timestamp of the event
  * @property string|null $ip Client IP address
  *
- * @property-read array|null $logInfoArray `log_info` decoded as a PHP array
+ * @property-read array|null $dataArray `data` decoded as a PHP array
  *
  * @author Julio Farra <juliofarra@gmail.com>
  */
@@ -38,7 +41,7 @@ class LogEvent extends ActiveRecord
 
     /**
      * Drivers with native JSON column support, where Yii handles the
-     * encoding/decoding of `log_info` automatically.
+     * encoding/decoding of `data` automatically.
      */
     private const JSON_NATIVE_DRIVERS = ['pgsql', 'mysql'];
 
@@ -56,12 +59,12 @@ class LogEvent extends ActiveRecord
     public function rules()
     {
         return [
-            [['objeto', 'objeto_id', 'evento', 'log_info'], 'required'],
-            [['objeto'], 'string'],
-            [['evento'], 'in', 'range' => [self::EVENT_INSERT, self::EVENT_UPDATE, self::EVENT_DELETE]],
-            [['objeto_id', 'id_user'], 'integer'],
+            [['entity', 'entity_id', 'event', 'data'], 'required'],
+            [['entity'], 'string'],
+            [['event'], 'in', 'range' => [self::EVENT_INSERT, self::EVENT_UPDATE, self::EVENT_DELETE]],
+            [['entity_id', 'user_id'], 'integer'],
             [['ip'], 'string', 'max' => 45],
-            [['log_info', 'ts'], 'safe'],
+            [['data', 'created_at'], 'safe'],
         ];
     }
 
@@ -71,14 +74,14 @@ class LogEvent extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id'        => 'ID',
-            'objeto'    => 'Object',
-            'objeto_id' => 'Object ID',
-            'evento'    => 'Event',
-            'log_info'  => 'Log Info',
-            'id_user'   => 'User',
-            'ts'        => 'Timestamp',
-            'ip'        => 'IP',
+            'id'         => 'ID',
+            'entity'     => 'Entity',
+            'entity_id'  => 'Entity ID',
+            'event'      => 'Event',
+            'data'       => 'Data',
+            'user_id'    => 'User',
+            'created_at' => 'Created At',
+            'ip'         => 'IP',
         ];
     }
 
@@ -92,7 +95,7 @@ class LogEvent extends ActiveRecord
     }
 
     /**
-     * Encodes `log_info` manually for drivers without native JSON support
+     * Encodes `data` manually for drivers without native JSON support
      * (e.g. SQLite). PostgreSQL and MySQL are handled by Yii itself.
      *
      * {@inheritdoc}
@@ -103,29 +106,29 @@ class LogEvent extends ActiveRecord
             return false;
         }
 
-        if (is_array($this->log_info)
+        if (is_array($this->data)
             && !in_array(static::getDb()->driverName, self::JSON_NATIVE_DRIVERS, true)
         ) {
-            $this->log_info = json_encode($this->log_info, JSON_UNESCAPED_UNICODE);
+            $this->data = json_encode($this->data, JSON_UNESCAPED_UNICODE);
         }
 
         return true;
     }
 
     /**
-     * Returns `log_info` decoded as a PHP array, regardless of the database
+     * Returns `data` decoded as a PHP array, regardless of the database
      * driver in use.
      *
      * @return array|null
      */
-    public function getLogInfoArray(): ?array
+    public function getDataArray(): ?array
     {
-        if (is_array($this->log_info)) {
-            return $this->log_info;
+        if (is_array($this->data)) {
+            return $this->data;
         }
 
-        if (is_string($this->log_info) && $this->log_info !== '') {
-            $decoded = json_decode($this->log_info, true);
+        if (is_string($this->data) && $this->data !== '') {
+            $decoded = json_decode($this->data, true);
 
             return is_array($decoded) ? $decoded : null;
         }
@@ -148,6 +151,6 @@ class LogEvent extends ActiveRecord
             );
         }
 
-        return $this->hasOne(Yii::$app->user->identityClass, ['id' => 'id_user']);
+        return $this->hasOne(Yii::$app->user->identityClass, ['id' => 'user_id']);
     }
 }

@@ -64,12 +64,12 @@ La tabla creada es:
 | Columna | Tipo | Descripción |
 |---|---|---|
 | `id` | int, PK | |
-| `objeto` | string | Nombre de tabla del registro auditado |
-| `objeto_id` | bigint | ID del registro auditado |
-| `evento` | string | `INSERT`, `UPDATE` o `DELETE` |
-| `log_info` | json | Snapshot o diff |
-| `id_user` | int, null | Usuario que realizó la acción |
-| `ts` | timestamp | Cuándo ocurrió (default de DB `CURRENT_TIMESTAMP`) |
+| `entity` | string | Nombre de tabla del registro auditado (referencia polimórfica, junto con `entity_id`) |
+| `entity_id` | bigint | ID del registro auditado |
+| `event` | string | `INSERT`, `UPDATE` o `DELETE` |
+| `data` | json | Snapshot o diff |
+| `user_id` | int, null | Usuario que realizó la acción |
+| `created_at` | timestamp | Cuándo ocurrió (default de DB `CURRENT_TIMESTAMP`) |
 | `ip` | string(45), null | IP del cliente (IPv4/IPv6) |
 
 ## Uso
@@ -157,9 +157,9 @@ El behavior agrega la relación `logEvents` al modelo auditado (más recientes p
 
 ```php
 foreach ($order->logEvents as $log) {
-    echo $log->evento;           // INSERT | UPDATE | DELETE
-    echo $log->ts;               // timestamp
-    print_r($log->logInfoArray); // payload decodificado como array PHP, en cualquier DB
+    echo $log->event;         // INSERT | UPDATE | DELETE
+    echo $log->created_at;    // timestamp
+    print_r($log->dataArray); // payload decodificado como array PHP, en cualquier DB
 }
 ```
 
@@ -169,7 +169,7 @@ O consultá directamente:
 use lab37\logevent\models\LogEvent;
 
 $logs = LogEvent::find()
-    ->forObject(Order::tableName(), $order->id)
+    ->forEntity(Order::tableName(), $order->id)
     ->ofEvent(LogEvent::EVENT_UPDATE)
     ->ordered()
     ->all();

@@ -68,12 +68,12 @@ The table created is:
 | Column | Type | Description |
 |---|---|---|
 | `id` | int, PK | |
-| `objeto` | string | Table name of the audited record |
-| `objeto_id` | bigint | ID of the audited record |
-| `evento` | string | `INSERT`, `UPDATE` or `DELETE` |
-| `log_info` | json | Snapshot or diff |
-| `id_user` | int, null | User who performed the action |
-| `ts` | timestamp | When it happened (DB default `CURRENT_TIMESTAMP`) |
+| `entity` | string | Table name of the audited record (polymorphic reference, together with `entity_id`) |
+| `entity_id` | bigint | ID of the audited record |
+| `event` | string | `INSERT`, `UPDATE` or `DELETE` |
+| `data` | json | Snapshot or diff |
+| `user_id` | int, null | User who performed the action |
+| `created_at` | timestamp | When it happened (DB default `CURRENT_TIMESTAMP`) |
 | `ip` | string(45), null | Client IP (IPv4/IPv6) |
 
 ## Usage
@@ -161,9 +161,9 @@ The behavior adds a `logEvents` relation to the owner model (newest first):
 
 ```php
 foreach ($order->logEvents as $log) {
-    echo $log->evento;           // INSERT | UPDATE | DELETE
-    echo $log->ts;               // timestamp
-    print_r($log->logInfoArray); // payload decoded as PHP array, on any DB
+    echo $log->event;         // INSERT | UPDATE | DELETE
+    echo $log->created_at;    // timestamp
+    print_r($log->dataArray); // payload decoded as PHP array, on any DB
 }
 ```
 
@@ -173,7 +173,7 @@ Or query directly:
 use lab37\logevent\models\LogEvent;
 
 $logs = LogEvent::find()
-    ->forObject(Order::tableName(), $order->id)
+    ->forEntity(Order::tableName(), $order->id)
     ->ofEvent(LogEvent::EVENT_UPDATE)
     ->ordered()
     ->all();

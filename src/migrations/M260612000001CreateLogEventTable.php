@@ -8,7 +8,7 @@ use yii\db\Migration;
  * Creates the `log_event` table used by [[\lab37\logevent\LogEventBehavior]].
  *
  * Compatible with PostgreSQL, MySQL/MariaDB and SQLite. On databases with
- * native JSON support the `log_info` column is created as JSON/JSONB; on the
+ * native JSON support the `data` column is created as JSON/JSONB; on the
  * rest it falls back to a plain text column transparently.
  */
 class M260612000001CreateLogEventTable extends Migration
@@ -24,18 +24,18 @@ class M260612000001CreateLogEventTable extends Migration
         }
 
         $this->createTable('{{%log_event}}', [
-            'id'        => $this->primaryKey(),
-            'objeto'    => $this->string(255)->notNull(),
-            'objeto_id' => $this->bigInteger()->notNull(),
-            'evento'    => $this->string(10)->notNull(),
-            'log_info'  => $this->json()->notNull(),
-            'id_user'   => $this->integer()->null(),
-            'ts'        => $this->timestamp()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
-            'ip'        => $this->string(45)->null(),
+            'id'         => $this->primaryKey(),
+            'entity'     => $this->string(255)->notNull(),
+            'entity_id'  => $this->bigInteger()->notNull(),
+            'event'      => $this->string(10)->notNull(),
+            'data'       => $this->json()->notNull(),
+            'user_id'    => $this->integer()->null(),
+            'created_at' => $this->timestamp()->notNull()->defaultExpression('CURRENT_TIMESTAMP'),
+            'ip'         => $this->string(45)->null(),
         ], $tableOptions);
 
-        $this->createIndex('idx_log_event_objeto', '{{%log_event}}', ['objeto', 'objeto_id']);
-        $this->createIndex('idx_log_event_id_user', '{{%log_event}}', 'id_user');
+        $this->createIndex('idx_log_event_entity', '{{%log_event}}', ['entity', 'entity_id']);
+        $this->createIndex('idx_log_event_user_id', '{{%log_event}}', 'user_id');
     }
 
     /**

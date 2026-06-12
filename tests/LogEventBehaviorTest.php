@@ -13,14 +13,14 @@ class LogEventBehaviorTest extends TestCase
     {
         $item = $this->createItem();
 
-        $log = LogEvent::find()->forObject('item', $item->id)->one();
+        $log = LogEvent::find()->forEntity('item', $item->id)->one();
 
         $this->assertNotNull($log);
-        $this->assertSame(LogEvent::EVENT_INSERT, $log->evento);
-        $this->assertSame('item', $log->objeto);
-        $this->assertEquals($item->id, $log->objeto_id);
+        $this->assertSame(LogEvent::EVENT_INSERT, $log->event);
+        $this->assertSame('item', $log->entity);
+        $this->assertEquals($item->id, $log->entity_id);
 
-        $info = $log->logInfoArray;
+        $info = $log->dataArray;
         $this->assertSame('Widget', $info['name']);
         $this->assertEquals(9.99, $info['price']);
         $this->assertEquals($item->id, $info['id']);
@@ -30,7 +30,7 @@ class LogEventBehaviorTest extends TestCase
     {
         $item = $this->createItem();
 
-        $info = LogEvent::find()->forObject('item', $item->id)->one()->logInfoArray;
+        $info = LogEvent::find()->forEntity('item', $item->id)->one()->dataArray;
 
         $this->assertArrayNotHasKey('token', $info, 'Excluded attributes must not appear in the log');
         $this->assertArrayHasKey('password', $info, 'Masked attributes must appear in the log');
@@ -44,12 +44,12 @@ class LogEventBehaviorTest extends TestCase
         $item->name = 'Gadget';
         $this->assertTrue($item->save());
 
-        $log = LogEvent::find()->forObject('item', $item->id)->ofEvent(LogEvent::EVENT_UPDATE)->one();
+        $log = LogEvent::find()->forEntity('item', $item->id)->ofEvent(LogEvent::EVENT_UPDATE)->one();
 
         $this->assertNotNull($log);
         $this->assertSame(
             ['name' => ['old' => 'Widget', 'new' => 'Gadget']],
-            $log->logInfoArray
+            $log->dataArray
         );
     }
 
@@ -59,7 +59,7 @@ class LogEventBehaviorTest extends TestCase
 
         $this->assertTrue($item->save());
 
-        $count = LogEvent::find()->forObject('item', $item->id)->ofEvent(LogEvent::EVENT_UPDATE)->count();
+        $count = LogEvent::find()->forEntity('item', $item->id)->ofEvent(LogEvent::EVENT_UPDATE)->count();
         $this->assertEquals(0, $count);
     }
 
@@ -70,7 +70,7 @@ class LogEventBehaviorTest extends TestCase
         $item->token = 'new-token';
         $this->assertTrue($item->save());
 
-        $count = LogEvent::find()->forObject('item', $item->id)->ofEvent(LogEvent::EVENT_UPDATE)->count();
+        $count = LogEvent::find()->forEntity('item', $item->id)->ofEvent(LogEvent::EVENT_UPDATE)->count();
         $this->assertEquals(0, $count, 'Changes only to excluded attributes must not trigger a log entry');
     }
 
@@ -81,12 +81,12 @@ class LogEventBehaviorTest extends TestCase
         $item->password = 'new-secret';
         $this->assertTrue($item->save());
 
-        $log = LogEvent::find()->forObject('item', $item->id)->ofEvent(LogEvent::EVENT_UPDATE)->one();
+        $log = LogEvent::find()->forEntity('item', $item->id)->ofEvent(LogEvent::EVENT_UPDATE)->one();
 
         $this->assertNotNull($log, 'Changes to masked attributes must trigger a log entry');
         $this->assertSame(
             ['password' => ['old' => '*****', 'new' => '*****']],
-            $log->logInfoArray
+            $log->dataArray
         );
     }
 
@@ -97,10 +97,10 @@ class LogEventBehaviorTest extends TestCase
 
         $this->assertEquals(1, $item->delete());
 
-        $log = LogEvent::find()->forObject('item', $id)->ofEvent(LogEvent::EVENT_DELETE)->one();
+        $log = LogEvent::find()->forEntity('item', $id)->ofEvent(LogEvent::EVENT_DELETE)->one();
 
         $this->assertNotNull($log);
-        $info = $log->logInfoArray;
+        $info = $log->dataArray;
         $this->assertSame('Widget', $info['name']);
         $this->assertSame('*****', $info['password']);
         $this->assertArrayNotHasKey('token', $info);
@@ -111,17 +111,17 @@ class LogEventBehaviorTest extends TestCase
         $item = new CustomLogItem(['name' => 'Custom']);
         $this->assertTrue($item->save());
 
-        $this->assertEquals(1, CustomLogEvent::find()->forObject('item', $item->id)->count());
-        $this->assertEquals(0, LogEvent::find()->forObject('item', $item->id)->count());
+        $this->assertEquals(1, CustomLogEvent::find()->forEntity('item', $item->id)->count());
+        $this->assertEquals(0, LogEvent::find()->forEntity('item', $item->id)->count());
     }
 
     public function testUserAndIpAreNullInConsoleApplications(): void
     {
         $item = $this->createItem();
 
-        $log = LogEvent::find()->forObject('item', $item->id)->one();
+        $log = LogEvent::find()->forEntity('item', $item->id)->one();
 
-        $this->assertNull($log->id_user);
+        $this->assertNull($log->user_id);
         $this->assertNull($log->ip);
     }
 
@@ -135,17 +135,17 @@ class LogEventBehaviorTest extends TestCase
         $logs = $item->logEvents;
 
         $this->assertCount(2, $logs);
-        $this->assertSame(LogEvent::EVENT_UPDATE, $logs[0]->evento);
-        $this->assertSame(LogEvent::EVENT_INSERT, $logs[1]->evento);
+        $this->assertSame(LogEvent::EVENT_UPDATE, $logs[0]->event);
+        $this->assertSame(LogEvent::EVENT_INSERT, $logs[1]->event);
     }
 
     public function testTimestampIsFilledByDatabaseDefault(): void
     {
         $item = $this->createItem();
 
-        $log = LogEvent::find()->forObject('item', $item->id)->one();
+        $log = LogEvent::find()->forEntity('item', $item->id)->one();
 
-        $this->assertNotEmpty($log->ts);
+        $this->assertNotEmpty($log->created_at);
     }
 
     private function createItem(): Item

@@ -14,18 +14,18 @@ use yii\db\ActiveQuery;
 class LogEventQuery extends ActiveQuery
 {
     /**
-     * Filters by audited object (table name) and optionally by record ID.
+     * Filters by audited entity (table name) and optionally by record ID.
      *
-     * @param string $objeto Table name of the audited record, as returned by its `tableName()`.
-     * @param int|string|null $objetoId ID of the audited record.
+     * @param string $entity Table name of the audited record, as returned by its `tableName()`.
+     * @param int|string|null $entityId ID of the audited record.
      * @return LogEventQuery
      */
-    public function forObject(string $objeto, $objetoId = null): LogEventQuery
+    public function forEntity(string $entity, $entityId = null): LogEventQuery
     {
-        $this->andWhere(['objeto' => $objeto]);
+        $this->andWhere(['entity' => $entity]);
 
-        if ($objetoId !== null) {
-            $this->andWhere(['objeto_id' => $objetoId]);
+        if ($entityId !== null) {
+            $this->andWhere(['entity_id' => $entityId]);
         }
 
         return $this;
@@ -34,12 +34,12 @@ class LogEventQuery extends ActiveQuery
     /**
      * Filters by event type (one of the LogEvent::EVENT_* constants).
      *
-     * @param string $evento
+     * @param string $event
      * @return LogEventQuery
      */
-    public function ofEvent(string $evento): LogEventQuery
+    public function ofEvent(string $event): LogEventQuery
     {
-        return $this->andWhere(['evento' => $evento]);
+        return $this->andWhere(['event' => $event]);
     }
 
     /**
@@ -49,7 +49,7 @@ class LogEventQuery extends ActiveQuery
      */
     public function ordered(): LogEventQuery
     {
-        return $this->addOrderBy(['ts' => SORT_DESC, 'id' => SORT_DESC]);
+        return $this->addOrderBy(['created_at' => SORT_DESC, 'id' => SORT_DESC]);
     }
 
     /**
