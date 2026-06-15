@@ -1,0 +1,67 @@
+/* LogEventWidget — minimal, framework-free styles. */
+
+.log-event-widget {
+    margin: 0.5em 0;
+    font-size: 0.9em;
+}
+
+.log-event-summary {
+    cursor: pointer;
+    padding: 0.25em 0.5em;
+    user-select: none;
+}
+
+.log-event-summary:hover {
+    text-decoration: underline;
+}
+
+.log-event-content {
+    padding: 0.25em 0;
+}
+
+.log-event-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.log-event-table td {
+    padding: 0.5em;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: top;
+}
+
+.log-event-meta {
+    display: block;
+    color: #666;
+    margin-bottom: 0.25em;
+}
+
+.log-event-action {
+    font-weight: bold;
+}
+
+.log-event-fields {
+    padding-left: 0.5em;
+}
+
+.log-event-field {
+    margin: 0.15em 0;
+}
+
+.log-event-label {
+    font-weight: bold;
+}
+
+.log-event-old {
+    text-decoration: line-through;
+    color: #a00;
+}
+
+.log-event-arrow {
+    margin: 0 0.25em;
+    color: #999;
+}
+
+.log-event-new {
+    color: #060;
+}

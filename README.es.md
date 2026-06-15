@@ -175,6 +175,76 @@ $logs = LogEvent::find()
     ->all();
 ```
 
+## Widget de visualización
+
+El paquete incluye un widget opcional que muestra el log de cambios de un modelo
+dentro de la misma página donde lo invocás — sin popup, sin Bootstrap, sin
+jQuery. Usa un elemento HTML5 `<details>` nativo, así que el log se expande y
+contrae sin JavaScript.
+
+```php
+use lab37\logevent\widgets\LogEventWidget;
+
+echo LogEventWidget::widget(['model' => $order]);
+```
+
+Esto genera un bloque colapsable que lista cada evento de `$order`, mostrando su
+fecha/hora, IP, usuario y los campos cambiados (viejo → nuevo en updates, el
+snapshot completo en inserts y deletes). Los valores se presentan con
+`Yii::$app->formatter`, y las etiquetas de los campos vienen de los
+`attributeLabels()` del modelo.
+
+### Referencia del widget
+
+| Propiedad | Default | Descripción |
+|---|---|---|
+| `model` | *(requerido)* | La instancia ActiveRecord auditada cuyo log se muestra |
+| `initiallyOpen` | `false` | Si el bloque `<details>` arranca expandido |
+| `buttonLabel` | `'Event Log'` | Texto del botón que despliega |
+| `customViewPath` | `null` | Ruta/alias de un view propio que toma el control del renderizado |
+
+### Estilos
+
+El paquete trae una hoja de estilos mínima como asset, registrada
+automáticamente. Si querés aplicar tus propios estilos, deshabilitá el bundle en
+la configuración de tu asset manager y apuntá a las clases `.log-event-*`:
+
+```php
+// config: components.assetManager
+'bundles' => [
+    'lab37\logevent\widgets\assets\LogEventWidgetAsset' => false,
+],
+```
+
+### View personalizado
+
+Para controlar el markup por completo, apuntá `customViewPath` a tu propio view.
+Recibe `$model` y `$logEvents`, y es el responsable de renderizar el log:
+
+```php
+echo LogEventWidget::widget([
+    'model'          => $order,
+    'customViewPath' => '@app/views/audit/_log',
+]);
+```
+
+```php
+// @app/views/audit/_log.php
+/** @var yii\db\ActiveRecord $model */
+/** @var lab37\logevent\models\LogEvent[] $logEvents */
+
+foreach ($logEvents as $log) {
+    // renderizá como quieras
+}
+```
+
+### Nota de rendimiento
+
+El view por defecto resuelve `$logEvent->user` por fila para mostrar el nombre
+del usuario (con fallback a `user_id`). Para modelos con historiales largos,
+hacé eager-loading de la relación para evitar consultas N+1 — o usá un
+`customViewPath` que muestre `user_id` directamente.
+
 ## Tests
 
 ```bash

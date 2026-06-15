@@ -179,6 +179,75 @@ $logs = LogEvent::find()
     ->all();
 ```
 
+## Display widget
+
+The package ships an optional widget that renders a model's change log inside the
+page where you call it — no popup, no Bootstrap, no jQuery. It uses a native
+HTML5 `<details>` element so the log expands and collapses without JavaScript.
+
+```php
+use lab37\logevent\widgets\LogEventWidget;
+
+echo LogEventWidget::widget(['model' => $order]);
+```
+
+This outputs a collapsible block listing every event for `$order`, each showing
+its timestamp, IP, user and the changed fields (old → new for updates, the full
+snapshot for inserts and deletes). Values are rendered through
+`Yii::$app->formatter`, and field labels come from the model's
+`attributeLabels()`.
+
+### Widget reference
+
+| Property | Default | Description |
+|---|---|---|
+| `model` | *(required)* | The audited ActiveRecord instance whose log is displayed |
+| `initiallyOpen` | `false` | Whether the `<details>` block starts expanded |
+| `buttonLabel` | `'Event Log'` | Text shown on the toggle |
+| `customViewPath` | `null` | Path/alias of a custom view that takes over rendering |
+
+### Styling
+
+A minimal stylesheet is bundled as an asset and registered automatically. To
+style the widget yourself, disable the bundle in your asset manager
+configuration and target the `.log-event-*` classes:
+
+```php
+// config: components.assetManager
+'bundles' => [
+    'lab37\logevent\widgets\assets\LogEventWidgetAsset' => false,
+],
+```
+
+### Custom view
+
+For full control over the markup, point `customViewPath` to your own view. It
+receives `$model` and `$logEvents` and is responsible for rendering the log:
+
+```php
+echo LogEventWidget::widget([
+    'model'          => $order,
+    'customViewPath' => '@app/views/audit/_log',
+]);
+```
+
+```php
+// @app/views/audit/_log.php
+/** @var yii\db\ActiveRecord $model */
+/** @var lab37\logevent\models\LogEvent[] $logEvents */
+
+foreach ($logEvents as $log) {
+    // render however you like
+}
+```
+
+### Performance note
+
+The default view resolves `$logEvent->user` per row to show the user's name
+(falling back to `user_id`). For models with long histories, eager-load the
+relation to avoid N+1 queries — or use a `customViewPath` that displays
+`user_id` directly.
+
 ## Tests
 
 ```bash
