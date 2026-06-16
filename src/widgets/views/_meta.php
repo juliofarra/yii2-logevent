@@ -5,7 +5,7 @@ use yii\helpers\Html;
 /** @var yii\web\View $this */
 /** @var \lab37\logevent\models\LogEvent $logEvent The event being rendered */
 
-$formatter = Yii::$app->formatter;
+$formatter = \Yii::$app->formatter;
 
 $datetime = $formatter->asDatetime($logEvent->created_at);
 // Prefer the related user's name; fall back to the numeric id when the relation
@@ -14,7 +14,7 @@ $datetime = $formatter->asDatetime($logEvent->created_at);
 // `has('user')` guard keeps the widget working when no user component exists
 // (e.g. console apps), where resolving the relation would throw.
 $user = $logEvent->user_id;
-if (Yii::$app->has('user')) {
+if (\Yii::$app->has('user')) {
     $user = $logEvent->user->username ?? $logEvent->user_id;
 }
 $user = $formatter->asText($user);

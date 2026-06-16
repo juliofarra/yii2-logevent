@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /** @var \lab37\logevent\models\LogEvent $logEvent The event being rendered */
 /** @var array $data Decoded payload: ['field' => value, ...] */
 
-$formatter = Yii::$app->formatter;
+$formatter = \Yii::$app->formatter;
 
 echo $this->render('_meta', ['logEvent' => $logEvent]);
 ?>

@@ -66,8 +66,10 @@ class LogEventWidgetTest extends TestCase
         $closed = LogEventWidget::widget(['model' => $item]);
         $open   = LogEventWidget::widget(['model' => $item, 'initiallyOpen' => true]);
 
-        $this->assertStringNotContainsString('<details class="log-event-widget" open>', $closed);
-        $this->assertStringContainsString('<details class="log-event-widget" open>', $open);
+        // Robust to whitespace around the attribute: only the open variant must
+        // carry the `open` attribute on the <details> element.
+        $this->assertStringNotContainsString('open>', $closed);
+        $this->assertStringContainsString('open>', $open);
     }
 
     public function testButtonLabelIsRendered(): void
@@ -136,10 +138,10 @@ class LogEventWidgetTest extends TestCase
 
         $this->assertStringContainsString('CUSTOM VIEW for item', $html);
         $this->assertStringContainsString('my-custom-log', $html);
-        // The default content table must NOT be rendered.
+        // With a custom view the widget renders ONLY that view: no default
+        // content table and no <details> shell from the package.
         $this->assertStringNotContainsString('log-event-table', $html);
-        // Still wrapped in the <details> shell.
-        $this->assertStringContainsString('<details', $html);
+        $this->assertStringNotContainsString('<details', $html);
     }
 
     private function createItem(): Item

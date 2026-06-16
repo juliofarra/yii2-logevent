@@ -203,6 +203,36 @@ snapshot completo en inserts y deletes). Los valores se presentan con
 | `buttonLabel` | `'Event Log'` | Texto del botón que despliega |
 | `customViewPath` | `null` | Ruta/alias de un view propio que toma el control del renderizado |
 
+### Configuración global
+
+`LogEventWidget::widget()` instancia el widget a través del contenedor de
+inyección de dependencias de Yii, así que podés definir valores por defecto para
+todos los llamados una sola vez en la configuración de tu aplicación — ideal
+para apuntar todos los widgets al mismo view personalizado sin repetirlo en cada
+invocación:
+
+```php
+// config/web.php
+'container' => [
+    'definitions' => [
+        \lab37\logevent\widgets\LogEventWidget::class => [
+            'customViewPath' => '@app/views/audit/_log',
+            'buttonLabel'    => 'Historial de cambios',
+        ],
+    ],
+],
+```
+
+A partir de ahí, cada llamado usa esos defaults, y cualquier invocación puntual
+puede sobrescribirlos:
+
+```php
+echo LogEventWidget::widget(['model' => $order]);                         // usa los defaults globales
+echo LogEventWidget::widget(['model' => $order, 'initiallyOpen' => true]); // sobrescribe por llamado
+```
+
+La precedencia es: **config por llamado > default del container > default de la propiedad**.
+
 ### Estilos
 
 El paquete trae una hoja de estilos mínima como asset, registrada
@@ -219,7 +249,12 @@ la configuración de tu asset manager y apuntá a las clases `.log-event-*`:
 ### View personalizado
 
 Para controlar el markup por completo, apuntá `customViewPath` a tu propio view.
-Recibe `$model` y `$logEvents`, y es el responsable de renderizar el log:
+Cuando lo definís, el widget renderiza **únicamente** ese view — la estructura
+`<details>` interna y la hoja de estilos del paquete se omiten por completo, así
+que tu view es dueño de todo el output (incluido cualquier botón para desplegar y
+sus estilos).
+
+El view recibe `$model`, `$logEvents`, `$initiallyOpen` y `$buttonLabel`:
 
 ```php
 echo LogEventWidget::widget([
@@ -232,6 +267,8 @@ echo LogEventWidget::widget([
 // @app/views/audit/_log.php
 /** @var yii\db\ActiveRecord $model */
 /** @var lab37\logevent\models\LogEvent[] $logEvents */
+/** @var bool $initiallyOpen */
+/** @var string $buttonLabel */
 
 foreach ($logEvents as $log) {
     // renderizá como quieras

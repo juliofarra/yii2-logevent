@@ -206,6 +206,34 @@ snapshot for inserts and deletes). Values are rendered through
 | `buttonLabel` | `'Event Log'` | Text shown on the toggle |
 | `customViewPath` | `null` | Path/alias of a custom view that takes over rendering |
 
+### Global configuration
+
+`LogEventWidget::widget()` instantiates the widget through Yii's DI container, so
+you can set defaults for every call once in your application configuration —
+ideal for pointing all widgets at the same custom view without repeating it:
+
+```php
+// config/web.php
+'container' => [
+    'definitions' => [
+        \lab37\logevent\widgets\LogEventWidget::class => [
+            'customViewPath' => '@app/views/audit/_log',
+            'buttonLabel'    => 'Change log',
+        ],
+    ],
+],
+```
+
+From then on, every call uses those defaults, and any individual call can still
+override them:
+
+```php
+echo LogEventWidget::widget(['model' => $order]);                         // uses the global defaults
+echo LogEventWidget::widget(['model' => $order, 'initiallyOpen' => true]); // overrides per call
+```
+
+Precedence is: **per-call config > container default > property default**.
+
 ### Styling
 
 A minimal stylesheet is bundled as an asset and registered automatically. To
@@ -221,8 +249,12 @@ configuration and target the `.log-event-*` classes:
 
 ### Custom view
 
-For full control over the markup, point `customViewPath` to your own view. It
-receives `$model` and `$logEvents` and is responsible for rendering the log:
+For full control over the markup, point `customViewPath` to your own view. When
+set, the widget renders **only** that view — the built-in `<details>` shell and
+the bundled stylesheet are skipped entirely, so your view owns the whole output
+(including any toggle button and its styling).
+
+The view receives `$model`, `$logEvents`, `$initiallyOpen` and `$buttonLabel`:
 
 ```php
 echo LogEventWidget::widget([
@@ -235,6 +267,8 @@ echo LogEventWidget::widget([
 // @app/views/audit/_log.php
 /** @var yii\db\ActiveRecord $model */
 /** @var lab37\logevent\models\LogEvent[] $logEvents */
+/** @var bool $initiallyOpen */
+/** @var string $buttonLabel */
 
 foreach ($logEvents as $log) {
     // render however you like

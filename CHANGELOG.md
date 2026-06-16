@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- `LogEventWidget`: when `customViewPath` is set, the widget now renders **only** that view — the built-in `<details>` shell and the bundled asset are skipped entirely, so the custom view owns the whole output (including any toggle button). The custom view now also receives `$initiallyOpen` and `$buttonLabel`.
+
+### Added
+
+- Documented global configuration of the widget via Yii's DI container (set defaults such as `customViewPath` once for every call).
+
 ## [1.1.0] - 2026-06-15
 
 ### Added

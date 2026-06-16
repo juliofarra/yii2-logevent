@@ -23,8 +23,10 @@ use yii\db\ActiveRecord;
  * ```
  *
  * To take full control of the presentation, point [[customViewPath]] to your
- * own view. That view receives `$model` and `$logEvents` and is responsible for
- * rendering the log however you want:
+ * own view. When set, the widget renders *only* that view — nothing else, not
+ * even the `<details>` shell or the bundled asset — so the view is responsible
+ * for the entire output, including any toggle button it wants. It receives
+ * `$model`, `$logEvents`, `$initiallyOpen` and `$buttonLabel`:
  *
  * ```php
  * echo LogEventWidget::widget([
@@ -56,8 +58,10 @@ class LogEventWidget extends Widget
 
     /**
      * @var string|null Path or alias of a custom view used to render the log.
-     * When set, it is rendered instead of the built-in view and receives the
-     * `$model` and `$logEvents` variables. When null, the default view is used.
+     * When set, the widget renders only this view (the built-in `<details>`
+     * shell and asset are skipped entirely) and passes it `$model`,
+     * `$logEvents`, `$initiallyOpen` and `$buttonLabel`. When null, the default
+     * view is used.
      */
     public $customViewPath;
 
@@ -81,14 +85,13 @@ class LogEventWidget extends Widget
      */
     public function run()
     {
-        $logEvents = $this->model->logEvents;
+        $viewPath = $this->customViewPath ?? 'log_event';
 
-        return $this->render('log_event', [
-            'model'          => $this->model,
-            'logEvents'      => $logEvents,
-            'initiallyOpen'  => $this->initiallyOpen,
-            'buttonLabel'    => $this->buttonLabel,
-            'customViewPath' => $this->customViewPath,
+        return $this->render($viewPath, [
+            'model'         => $this->model,
+            'logEvents'     => $this->model->logEvents,
+            'initiallyOpen' => $this->initiallyOpen,
+            'buttonLabel'   => $this->buttonLabel,
         ]);
     }
 }
